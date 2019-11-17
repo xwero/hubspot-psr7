@@ -1,0 +1,16 @@
+{
+    "name": "davidduymelinck/hubspot-psr7",
+    "description": "Create hubspot PSR7 requests to connect to whatever http client you want to use",
+    "require": {
+        "php": "^7.1",
+        "ext-json": "*",
+        "nyholm/psr7": "^1.0",
+        "php-ds/php-ds": "^1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hubspot\\Psr7\\": "src/"
+        }
+    },
+    "license": "MIT"
+}
