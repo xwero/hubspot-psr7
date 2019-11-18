@@ -14,9 +14,10 @@ final class BuildEndpoint
     const OPTION_QUERY_STRING = 2;
 
     private $endpoint = '';
+    private $apiKey = '';
     private $options;
 
-    public function __construct(string $endpoint)
+    public function __construct(string $endpoint, string $apiKey)
     {
         $this->checkEndpoint($endpoint);
 
@@ -27,6 +28,7 @@ final class BuildEndpoint
         $this->options = $options;
 
         $this->endpoint = $endpoint;
+        $this->apiKey = $apiKey;
     }
 
     public function setVersion2()
@@ -74,10 +76,10 @@ final class BuildEndpoint
             $endpoint = str_replace($this->options[self::OPTION_REPLACEMENTS]->keys(), $this->options[self::OPTION_REPLACEMENTS]->values(), $endpoint);
         }
         //TODO authentication querystring
-        $queryString = '';
+        $queryString = '?hapikey=' . $this->apiKey;
 
         if($this->options->hasKey(self::OPTION_QUERY_STRING)) {
-            $queryString = '?' . $this->options->get(self::OPTION_QUERY_STRING);
+            $queryString .= '&' . $this->options->get(self::OPTION_QUERY_STRING);
         }
 
         return self::BASE_URL . $endpoint . $queryString;

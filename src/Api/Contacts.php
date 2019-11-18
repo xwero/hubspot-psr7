@@ -14,7 +14,7 @@ final class Contacts extends Base
 
     public function createContact(array $properties)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact', $this->apiKey);
         $request = $this->psr17Factory->createRequest('POST', $endpoint);
         $requestData = new BuildProperties($properties);
         $requestBody = json_encode($requestData);
@@ -26,7 +26,7 @@ final class Contacts extends Base
 
     public function updateContactById(int $id, array $properties)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/vid/:vid/profile');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/vid/:vid/profile', $this->apiKey);
 
         $endpoint->setReplacements([':vid' => $id]);
 
@@ -41,7 +41,7 @@ final class Contacts extends Base
 
     public function updateContactByEmail(string $email, array $properties)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/email/:email/profile');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/email/:email/profile', $this->apiKey);
 
         $endpoint->setReplacements([':email' => $email]);
 
@@ -56,7 +56,7 @@ final class Contacts extends Base
 
     public function createOrUpdateContactByEmail(string $email, array $properties)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/createOrUpdate/email/:email');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/createOrUpdate/email/:email', $this->apiKey);
 
         $endpoint->setReplacements([':email' => $email]);
 
@@ -71,7 +71,7 @@ final class Contacts extends Base
 
     public function createOrUpdateContacts(BuildContacts $contacts)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/batch/');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/batch/', $this->apiKey);
         $request = $this->psr17Factory->createRequest('POST', $endpoint);
         $requestBody = json_encode($contacts);
 
@@ -82,7 +82,7 @@ final class Contacts extends Base
 
     public function deleteContactById($id)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/vid/:id', );
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/vid/:id', $this->apiKey);
 
         $endpoint->setReplacements([':id' => $id]);
 
@@ -93,7 +93,7 @@ final class Contacts extends Base
 
     public function getAllContacts(QueryString $queryString = NULL)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/lists/all/contacts/all');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/lists/all/contacts/all', $this->apiKey);
 
         $endpoint->setQueryString($queryString);
 
@@ -104,7 +104,7 @@ final class Contacts extends Base
 
     public function getRecentlyModifiedContacts(QueryString $queryString = NULL)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/lists/recently_updated/contacts/recent');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/lists/recently_updated/contacts/recent', $this->apiKey);
 
         $endpoint->setQueryString($queryString);
 
@@ -115,7 +115,7 @@ final class Contacts extends Base
 
     public function getRecentlyCreatedContacts($queryString = NULL)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/lists/all/contacts/recent');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/lists/all/contacts/recent', $this->apiKey);
 
         $endpoint->setQueryString($queryString);
 
@@ -126,7 +126,7 @@ final class Contacts extends Base
 
     public function getContactById(int $id, QueryString $queryString = NULL)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/vid/:vid/profile');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/vid/:vid/profile', $this->apiKey);
 
         $endpoint->setReplacements([':vid' => $id])
                 ->setQueryString($queryString);
@@ -138,7 +138,7 @@ final class Contacts extends Base
 
     public function getContactByEmail(string $email, QueryString $queryString = NULL)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/email/:email/profile');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/email/:email/profile', $this->apiKey);
 
         $endpoint->setReplacements([':email' => $email])
             ->setQueryString($queryString);
@@ -150,7 +150,7 @@ final class Contacts extends Base
 
     public function getContactsById(QueryString $queryString = NULL)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/vids/batch/');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/vids/batch/', $this->apiKey);
 
         $endpoint->setQueryString($queryString);
 
@@ -161,7 +161,7 @@ final class Contacts extends Base
 
     public function getContactByToken(string $token, QueryString $queryString = NULL)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/utk/:token/profile');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/utk/:token/profile', $this->apiKey);
 
         $endpoint->setReplacements([':token' => $token])
                 ->setQueryString($queryString);
@@ -179,7 +179,7 @@ final class Contacts extends Base
      */
     public function searchContacts(QueryString $queryString)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/search/query');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/search/query', $this->apiKey);
 
         $endpoint->setQueryString($queryString);
 
@@ -190,7 +190,7 @@ final class Contacts extends Base
 
     public function mergeContact($primaryId, $secondaryId)
     {
-        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/merge-vids/:id/');
+        $endpoint = new BuildEndpoint('/contacts/:apiversion/contact/merge-vids/:id/', $this->apiKey);
 
         $endpoint->setReplacements([':id' => $primaryId]);
 
@@ -204,7 +204,7 @@ final class Contacts extends Base
 
     public function getLifecycleStageMetrics(QueryString $queryString)
     {
-        $endpoint = new BuildEndpoint('/contacts/search/:apiversion/external/lifecyclestages');
+        $endpoint = new BuildEndpoint('/contacts/search/:apiversion/external/lifecyclestages', $this->apiKey);
 
         $endpoint->setQueryString($queryString);
 

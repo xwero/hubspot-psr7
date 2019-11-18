@@ -179,58 +179,59 @@ class ContactQueryString implements QueryString
     {
         $queryStringCollection = new Vector();
 
-        if(count($this->properties) > 0) {
-            $queryStringCollection[] = 'property=' . join('&property=', $this->properties);
+        if($this->keyValuePairs->hasKey(self::OPTION_PROPERTIES)) {
+            $queryStringCollection[] = 'property=' . $this->keyValuePairs[self::OPTION_PROPERTIES]->join('&property=');
         }
 
-        if(count($this->ids) > 0) {
-            $queryStringCollection[] = 'vid=' . join('&vid=', $this->ids);
+        if($this->keyValuePairs->hasKey(self::OPTION_IDS)) {
+            $queryStringCollection[] = 'vid=' . $this->keyValuePairs[self::OPTION_IDS]->join('&vid=');
         }
 
-        if(count($this->tokens) > 0) {
-            $queryStringCollection[] = 'utk=' . join('&utk=', $this->tokens);
+        if($this->keyValuePairs->hasKey(self::OPTION_TOKENS)) {
+            $queryStringCollection[] = 'utk=' . $this->keyValuePairs[self::OPTION_TOKENS]->join('&utk=');
         }
 
-        if($this->count !== 20) {
+        if($this->keyValuePairs->hasKey(self::OPTION_COUNT) && $this->keyValuePairs[self::OPTION_COUNT] !== 20) {
             $queryString = 'count=';
-            $queryString .= $this->count > 100 ? 100 : $this->count;
+            $count = $this->keyValuePairs[self::OPTION_COUNT];
+            $queryString .= $count > 100 ? 100 : $count;
 
             $queryStringCollection[] = $queryString;
         }
 
-        if(is_int($this->offset)) {
-            $queryStringCollection[] = 'vidOffset=' . $this->offset;
+        if($this->keyValuePairs->hasKey(self::OPTION_ID_OFFSET)) {
+            $queryStringCollection[] = 'vidOffset=' . $this->keyValuePairs[self::OPTION_ID_OFFSET];
         }
 
-        if(is_int($this->timeOffset)) {
-            $queryStringCollection[] = 'timeOffset=' . $this->timeOffset;
+        if($this->keyValuePairs->hasKey(self::OPTION_TIME_OFFSET)) {
+            $queryStringCollection[] = 'timeOffset=' . $this->keyValuePairs[self::OPTION_TIME_OFFSET];
         }
 
-        if(is_string($this->search)) {
-            $queryStringCollection[] = 'q=' . $this->search;
+        if($this->keyValuePairs->hasKey(self::OPTION_SEARCH)) {
+            $queryStringCollection[] = 'q=' . $this->keyValuePairs[self::OPTION_SEARCH];
         }
 
-        if(is_string($this->sort)) {
-            $display = 'sort=' . $this->sort;
+        if($this->keyValuePairs->hasKey(self::OPTION_SORT)) {
+            $display = 'sort=' . $this->keyValuePairs[self::OPTION_SORT];
 
-            if($this->order !== self::ORDER_DESC) {
-                $display .= '&order=' . $this->order;
+            if($this->keyValuePairs->hasKey(self::OPTION_ORDER_ASCENDING)) {
+                $display .= '&order=' . $this->keyValuePairs[self::OPTION_ORDER_ASCENDING];
             }
         }
 
-        if($this->propertyMode !== self::PROPERTY_MODE_VALUE) {
-            $queryStringCollection[] = 'propertyMode=' . $this->propertyMode;
+        if($this->keyValuePairs->hasKey(self::OPTION_PROPERTY_MODE)) {
+            $queryStringCollection[] = 'propertyMode=' . $this->keyValuePairs[self::OPTION_PROPERTY_MODE];
         }
 
-        if($this->submissionMode !== self::SUBMISSION_MODE_NEWEST) {
-            $queryStringCollection[] = 'formSubmissionMode=' . $this->submissionMode;
+        if($this->keyValuePairs->hasKey(self::OPTION_FORM_SUBMISSION_MODE)) {
+            $queryStringCollection[] = 'formSubmissionMode=' . $this->keyValuePairs[self::OPTION_FORM_SUBMISSION_MODE];
         }
 
-        if($this->listMembership) {
+        if($this->keyValuePairs->hasKey(self::OPTION_SHOW_LIST_MEMBERSHIP)) {
             $queryStringCollection[] = 'showListMemberships=true';
         }
 
-        if($this->includeDeleted) {
+        if($this->keyValuePairs->hasKey(self::OPTION_SHOW_DELETED)) {
             $queryStringCollection[] = 'includeDeletes=true';
         }
 
