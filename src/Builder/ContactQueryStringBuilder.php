@@ -1,15 +1,14 @@
 <?php
 
-
-namespace Hubspot\Psr7;
+namespace Hubspot\Psr7\Builder;
 
 
 use Ds\Map;
 use Ds\Set;
 use Ds\Vector;
-use QueryString;
+use Hubspot\Psr7\Exception\RequiredQueryStringOptionsException;
 
-class ContactQueryString implements QueryString
+class ContactQueryStringBuilder implements QueryStringInterface
 {
     const PROPERTY_MODE_FULL = 'value_and_history';
     const SUBMISSION_MODE_ALL = 'all';
@@ -29,19 +28,27 @@ class ContactQueryString implements QueryString
     const OPTION_TIME_OFFSET = 10;
     const OPTION_SEARCH = 11;
     const OPTION_SORT = 12;
+    const OPTION_TIMESTAMP_FROM = 13;
+    const OPTION_TIMESTAMP_TO = 14;
+    const OPTION_AGGREGATION = 15;
+    const OPTION_OFFSET = 16;
 
     private $keyValuePairs;
+    private $requiredOptions;
+    private $optionalOptions;
 
     public function __construct()
     {
         $this->keyValuePairs = new Map();
+        $this->requiredOptions = new Vector();
+        $this->optionalOptions = new Vector();
     }
 
     public function addProperty(string $property)
     {
         $properties = $this->keyValuePairs->get(self::OPTION_PROPERTIES, new Vector());
 
-        $properties->set($property);
+        $properties->push($property);
 
         $this->keyValuePairs->put(self::OPTION_PROPERTIES, $properties);
 
@@ -59,7 +66,7 @@ class ContactQueryString implements QueryString
     {
         $ids = $this->keyValuePairs->get(self::OPTION_IDS, new Vector());
 
-        $ids->set($id);
+        $ids->push($id);
 
         $this->keyValuePairs->put(self::OPTION_IDS, $ids);
 
@@ -77,7 +84,7 @@ class ContactQueryString implements QueryString
     {
         $tokens = $this->keyValuePairs->get(self::OPTION_TOKENS, new Vector());
 
-        $tokens->set($token);
+        $tokens->push($token);
 
         $this->keyValuePairs->put(self::OPTION_TOKENS, $tokens);
 
@@ -122,6 +129,8 @@ class ContactQueryString implements QueryString
     public function orderAscending()
     {
         $this->keyValuePairs->put(self::OPTION_ORDER_ASCENDING, self::ORDER_ASC);
+
+        return $this;
     }
 
     public function setFormSubmissionMode(string $submissionMode)
@@ -129,6 +138,13 @@ class ContactQueryString implements QueryString
         if(in_array($submissionMode, [self::SUBMISSION_MODE_ALL, self::SUBMISSION_MODE_OLDEST, self::SUBMISSION_MODE_NONE])) {
             $this->keyValuePairs->put(self::OPTION_FORM_SUBMISSION_MODE, $submissionMode);
         }
+
+        return $this;
+    }
+
+    public function setOffset(int $offset)
+    {
+        $this->keyValuePairs->put(self::OPTION_OFFSET, $offset);
 
         return $this;
     }
@@ -165,13 +181,57 @@ class ContactQueryString implements QueryString
         return $this;
     }
 
-    public function clean(array $allowed)
+    public function setFromTimestamp(int $timestamp)
+    {
+        $this->keyValuePairs->put(self::OPTION_TIMESTAMP_FROM, $timestamp);
+
+        return $this;
+    }
+
+    public function setToTimestamp(int $timestamp)
+    {
+        $this->keyValuePairs->put(self::OPTION_TIMESTAMP_TO, $timestamp);
+
+        return $this;
+    }
+
+    public function setAggregationProperty(string $property)
+    {
+        $this->keyValuePairs->put(self::OPTION_AGGREGATION, $property);
+
+        return $this;
+    }
+
+    public function setRequiredOptions(array $options)
+    {
+        if(count($options) > 0) {
+            $this->requiredOptions = new Vector($options);
+        }
+    }
+
+    public function setOptionalOptions(array $options)
+    {
+        if(count($options) > 0) {
+            $this->optionalOptions = new Vector($options);
+        }
+    }
+
+    public function checkAndClean()
     {
         $allOptions = $this->keyValuePairs->keys();
-        $notAllowed = $allOptions->diff(new Set($allowed));
 
-        foreach ($notAllowed as $removeKey) {
-            $this->keyValuePairs->remove($removeKey);
+        if($this->requiredOptions->count() > 0 && !$allOptions->contains(...$this->requiredOptions->toArray())) {
+            throw new RequiredQueryStringOptionsException();
+        }
+
+        if($this->optionalOptions->count() > 0) {
+            $allAllowed = $this->requiredOptions->merge($this->optionalOptions->toArray());
+            $allAllowed = new Set($allAllowed->toArray());
+            $notAllowed = $allOptions->diff($allAllowed);
+
+            foreach ($notAllowed as $removeKey) {
+                $this->keyValuePairs->remove($removeKey);
+            }
         }
     }
 
@@ -199,8 +259,24 @@ class ContactQueryString implements QueryString
             $queryStringCollection[] = $queryString;
         }
 
+        if($this->keyValuePairs->hasKey(self::OPTION_OFFSET)) {
+            $queryStringCollection[] = 'offset=' . $this->keyValuePairs[self::OPTION_OFFSET];
+        }
+
         if($this->keyValuePairs->hasKey(self::OPTION_ID_OFFSET)) {
             $queryStringCollection[] = 'vidOffset=' . $this->keyValuePairs[self::OPTION_ID_OFFSET];
+        }
+
+        if($this->keyValuePairs->hasKey(self::OPTION_TIMESTAMP_FROM)) {
+            $queryStringCollection[] = 'fromTimestamp=' . $this->keyValuePairs[self::OPTION_TIMESTAMP_FROM];
+        }
+
+        if($this->keyValuePairs->hasKey(self::OPTION_TIMESTAMP_TO)) {
+            $queryStringCollection[] = 'toTimestamp=' . $this->keyValuePairs[self::OPTION_TIMESTAMP_TO];
+        }
+
+        if($this->keyValuePairs->hasKey(self::OPTION_AGGREGATION)) {
+            $queryStringCollection[] = 'aggregationProperty=' . $this->keyValuePairs[self::OPTION_AGGREGATION];
         }
 
         if($this->keyValuePairs->hasKey(self::OPTION_TIME_OFFSET)) {
@@ -217,6 +293,8 @@ class ContactQueryString implements QueryString
             if($this->keyValuePairs->hasKey(self::OPTION_ORDER_ASCENDING)) {
                 $display .= '&order=' . $this->keyValuePairs[self::OPTION_ORDER_ASCENDING];
             }
+
+            $queryStringCollection[] = $display;
         }
 
         if($this->keyValuePairs->hasKey(self::OPTION_PROPERTY_MODE)) {

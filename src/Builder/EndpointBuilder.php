@@ -1,23 +1,22 @@
 <?php
 
 
-namespace Hubspot\Psr7;
+namespace Hubspot\Psr7\Builder;
 
 use Ds\Map;
 use Exception;
-use QueryString;
 
-final class BuildEndpoint
+final class EndpointBuilder implements EndpointBuilderInterface
 {
     const BASE_URL = 'https://api.hubapi.com';
     const OPTION_REPLACEMENTS = 1;
     const OPTION_QUERY_STRING = 2;
 
     private $endpoint = '';
-    private $apiKey = '';
+    private $authorisation;
     private $options;
 
-    public function __construct(string $endpoint, string $apiKey)
+    public function __construct(string $endpoint, AuthorisationInterface $authorisation)
     {
         $this->checkEndpoint($endpoint);
 
@@ -28,7 +27,7 @@ final class BuildEndpoint
         $this->options = $options;
 
         $this->endpoint = $endpoint;
-        $this->apiKey = $apiKey;
+        $this->authorisation = $authorisation;
     }
 
     public function setVersion2()
@@ -46,16 +45,22 @@ final class BuildEndpoint
     }
 
     public function setReplacements(array $replacements) {
-        $this->options[self::OPTION_REPLACEMENTS]->merge($replacements);
+        $this->options[self::OPTION_REPLACEMENTS]->putAll($replacements);
 
         return $this;
     }
 
-    public function setQueryString(QueryString $queryString, array $allowedOptions = [])
+    public function setQueryString(QueryStringInterface $queryString, array $optionalOptions = [], array $requiredOptions = [])
     {
-        if(count($allowedOptions) > 0) {
-            $queryString->clean($allowedOptions);
+        if(count($optionalOptions) > 0) {
+            $queryString->setOptionalOptions($optionalOptions);
         }
+
+        if(count($requiredOptions) > 0) {
+            $queryString->setRequiredOptions($requiredOptions);
+        }
+
+        $queryString->checkAndClean();
 
         $this->options->put(self::OPTION_QUERY_STRING, $queryString->getQueryString());
 
@@ -73,14 +78,11 @@ final class BuildEndpoint
         $endpoint = $this->endpoint;
 
         if($this->options->hasKey(self::OPTION_REPLACEMENTS)) {
-            $endpoint = str_replace($this->options[self::OPTION_REPLACEMENTS]->keys(), $this->options[self::OPTION_REPLACEMENTS]->values(), $endpoint);
+            $endpoint = str_replace($this->options[self::OPTION_REPLACEMENTS]->keys()->toArray(), $this->options[self::OPTION_REPLACEMENTS]->values()->toArray(), $endpoint);
         }
-        //TODO authentication querystring
-        $queryString = '?hapikey=' . $this->apiKey;
 
-        if($this->options->hasKey(self::OPTION_QUERY_STRING)) {
-            $queryString .= '&' . $this->options->get(self::OPTION_QUERY_STRING);
-        }
+        $queryString = $this->options->hasKey(self::OPTION_QUERY_STRING) ? $this->options->get(self::OPTION_QUERY_STRING) : '' ;
+        $queryString = $this->authorisation->addToQueryString($queryString);
 
         return self::BASE_URL . $endpoint . $queryString;
     }
@@ -88,15 +90,15 @@ final class BuildEndpoint
     private function checkEndpoint(string $endpoint)
     {
         if (empty(trim($endpoint))) {
-            throw  new Exception('BuildEndpoint error: empty endpoint.');
+            throw  new Exception('EndpointBuilder error: empty endpoint.');
         }
 
         if ($endpoint[0] !== '/') {
-            throw  new Exception('BuildEndpoint error: endpoint did not start with a forward slash.');
+            throw  new Exception('EndpointBuilder error: endpoint did not start with a forward slash.');
         }
 
-        if(strpos(':apiversion', $endpoint) === FALSE) {
-            throw  new Exception('BuildEndpoint error: endpoint did not have an :apiversion url fragment.');
+        if(strpos($endpoint, ':apiversion') === FALSE) {
+            throw  new Exception('EndpointBuilder error: endpoint did not have an :apiversion url fragment.');
         }
     }
 }

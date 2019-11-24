@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Hubspot\Psr7;
+namespace Hubspot\Psr7\Builder;
 
 
 use JsonSerializable;
 
-class BuildContacts implements JsonSerializable
+class ContactsBuilder implements JsonSerializable
 {
     const BY_EMAIL = 'email';
     const BY_ID = 'vid';
@@ -20,7 +20,7 @@ class BuildContacts implements JsonSerializable
 
     public function addContact(string $identifyBy, $identityValue, array $properties)
     {
-        $contactProperties = (new BuildProperties($properties))->toArray();
+        $contactProperties = (new PropertiesBuilder($properties))->toArray();
         $contact = array_merge([$identifyBy => $identityValue], $contactProperties);
 
         $this->contacts[] = $contact;

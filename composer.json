@@ -12,5 +12,12 @@
             "Hubspot\\Psr7\\": "src/"
         }
     },
-    "license": "MIT"
+    "license": "MIT",
+    "require-dev": {
+        "phpunit/phpunit": "8"
+    },
+    "scripts": {
+        "test": "./vendor/bin/phpunit --bootstrap vendor/autoload.php --testdox tests",
+        "test:win": ".\\vendor\\bin\\phpunit.bat --bootstrap vendor/autoload.php --testdox tests"
+    }
 }

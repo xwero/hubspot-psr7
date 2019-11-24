@@ -21,12 +21,14 @@ echo $contact->properties->email->value;
 You do:
 
 ```php
-$request = (new Hubspot\Psr7\Api\Contacts('demo'))->getContactByEmail("test@hubspot.com");
-// your app is responsible for making the request and returning a PSR-7 response
+// The AuthorisationBuilder also provides methods to get a new or refresh an access token.
+$auth = new AuthorisationBuilder(AuthorisationBuilder::TYPE_KEY, 'api-key');
+$request = (new Hubspot\Psr7\Request\ContactsRequest($auth))->getContactByEmail("test@hubspot.com");
+// Your app is responsible for making the request and returning a PSR-7 response
 $psr17Factory = new \Nyholm\Psr7\Factory\Psr17Factory();
 $psr18Client = new \Buzz\Client\Curl($psr17Factory);
 
-echo (new Hubspot\Psr7\Response\Contacts($psr18Client->sendRequest($request))->getContactPropertyValue('email');
+echo (new Hubspot\Psr7\Response\ContactsResponse($psr18Client->sendRequest($request))->getContactPropertyValue('email');
 ```
 
 One of the things i was concerned for was a lot more code for the same action, but I think I was able to keep it short enough for people to make the switch.
