@@ -25,10 +25,9 @@ You do:
 $auth = new AuthorisationBuilder(AuthorisationBuilder::TYPE_KEY, 'api-key');
 $request = (new Hubspot\Psr7\Request\ContactsRequest($auth))->getContactByEmail("test@hubspot.com");
 // Your app is responsible for making the request and returning a PSR-7 response
-$psr17Factory = new \Nyholm\Psr7\Factory\Psr17Factory();
-$psr18Client = new \Buzz\Client\Curl($psr17Factory);
+$client = new Buzz\Client\FileGetContents(new Nyholm\Psr7\Factory\Psr17Factory(), ['allow_redirects' => true]);
 
-echo (new Hubspot\Psr7\Response\ContactsResponse($psr18Client->sendRequest($request))->getContactPropertyValue('email');
+echo (new Hubspot\Psr7\Response\ContactsResponse($client->sendRequest($request)))->getContactPropertyValue('firstname');
 ```
 
 One of the things i was concerned for was a lot more code for the same action, but I think I was able to keep it short enough for people to make the switch.

@@ -13,6 +13,7 @@ abstract class Base
     const METHOD_GET = 'GET';
     const METHOD_PUT ='PUT';
     const METHOD_DELETE = 'DELETE';
+    const METHOD_PATCH = 'PATCH';
 
     protected $authorisation;
 

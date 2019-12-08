@@ -8,7 +8,7 @@ use Ds\Set;
 use Ds\Vector;
 use Hubspot\Psr7\Exception\RequiredQueryStringOptionsException;
 
-class ContactQueryStringBuilder implements QueryStringInterface
+class ContactQueryStringBuilder extends BaseQueryStringBuilder
 {
     const PROPERTY_MODE_FULL = 'value_and_history';
     const SUBMISSION_MODE_ALL = 'all';
@@ -31,18 +31,6 @@ class ContactQueryStringBuilder implements QueryStringInterface
     const OPTION_TIMESTAMP_FROM = 13;
     const OPTION_TIMESTAMP_TO = 14;
     const OPTION_AGGREGATION = 15;
-    const OPTION_OFFSET = 16;
-
-    private $keyValuePairs;
-    private $requiredOptions;
-    private $optionalOptions;
-
-    public function __construct()
-    {
-        $this->keyValuePairs = new Map();
-        $this->requiredOptions = new Vector();
-        $this->optionalOptions = new Vector();
-    }
 
     public function addProperty(string $property)
     {
@@ -142,13 +130,6 @@ class ContactQueryStringBuilder implements QueryStringInterface
         return $this;
     }
 
-    public function setOffset(int $offset)
-    {
-        $this->keyValuePairs->put(self::OPTION_OFFSET, $offset);
-
-        return $this;
-    }
-
     public function setIdOffset(int $id)
     {
         $this->keyValuePairs->put(self::OPTION_ID_OFFSET, $id);
@@ -200,39 +181,6 @@ class ContactQueryStringBuilder implements QueryStringInterface
         $this->keyValuePairs->put(self::OPTION_AGGREGATION, $property);
 
         return $this;
-    }
-
-    public function setRequiredOptions(array $options)
-    {
-        if(count($options) > 0) {
-            $this->requiredOptions = new Vector($options);
-        }
-    }
-
-    public function setOptionalOptions(array $options)
-    {
-        if(count($options) > 0) {
-            $this->optionalOptions = new Vector($options);
-        }
-    }
-
-    public function checkAndClean()
-    {
-        $allOptions = $this->keyValuePairs->keys();
-
-        if($this->requiredOptions->count() > 0 && !$allOptions->contains(...$this->requiredOptions->toArray())) {
-            throw new RequiredQueryStringOptionsException();
-        }
-
-        if($this->optionalOptions->count() > 0) {
-            $allAllowed = $this->requiredOptions->merge($this->optionalOptions->toArray());
-            $allAllowed = new Set($allAllowed->toArray());
-            $notAllowed = $allOptions->diff($allAllowed);
-
-            foreach ($notAllowed as $removeKey) {
-                $this->keyValuePairs->remove($removeKey);
-            }
-        }
     }
 
     public function getQueryString()
